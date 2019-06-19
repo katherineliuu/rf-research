@@ -1,0 +1,187 @@
+---
+title: "Boston housing"
+author: "Katherine Liu"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# setup
+#install.packages("randomForest")
+library(randomForest)
+library(readr)
+library(MASS)
+set.seed (1)
+train = sample(1:nrow(Boston), nrow(Boston)/2)
+#test <- read_csv("Desktop/boston-housing/test.csv")
+#train <- read_csv("Desktop/boston-housing/train.csv")
+#Boston <- rbind(train, test)
+data(Boston)
+dim(Boston)
+
+```
+
+```{r pressure, echo=FALSE}
+# random forest
+rf.boston=randomForest(medv~., data=Boston, subset=train, mtry=6,importance =TRUE)
+
+yhat.rf = predict(rf.boston , newdata=Boston[-train,])
+boston.test = Boston[-train ,"medv"]
+
+MSErf <- mean((yhat.rf - boston.test)^2)
+importance (rf.boston)
+```
+```{r}
+M0 <-  lm(data=Boston, medv ~ .)
+summary(M0)
+
+# plots on variables
+summary(Boston)
+library(ggformula)
+gf_histogram(data=Boston, ~crim)
+gf_point(data=Boston, medv~crim) %>% gf_lm()
+# rm: average number of rooms per dwelling.
+gf_histogram(data=Boston, ~rm)
+gf_point(data=Boston, medv~rm) %>% gf_lm()
+gf_histogram(data=Boston, ~lstat)
+gf_point(data=Boston, medv~lstat) %>% gf_lm() + stat_smooth(method="lm", se=TRUE, fill=NA,formula=y ~ poly(x, 2, raw=TRUE),colour="red")+ stat_smooth(method="lm", se=TRUE, fill=NA,formula=y ~ poly(x, 3, raw=TRUE),colour="green")
+# dis: weighted mean of distances to five Boston employment centres
+gf_histogram(data=Boston, ~dis)
+gf_point(data=Boston, medv~dis) %>% gf_lm()
+#nox: nitrogen oxides concentration (parts per 10 million).
+gf_histogram(data=Boston, ~nox)
+gf_point(data=Boston, medv~nox) %>% gf_lm()
+#ptratio
+gf_histogram(data=Boston, ~ptratio)
+gf_point(data=Boston, medv~ptratio) %>% gf_lm()
+
+gf_point(data=Boston, medv~tax) %>% gf_lm()
+gf_point(data=Boston, medv~age) %>% gf_lm()
+gf_point(data=Boston, medv~indus) %>% gf_lm()
+
+
+
+```
+```{r}
+#install.packages("GGally")
+library("GGally")
+ggpairs(data=Boston) ##not very clear
+
+M2 <- lm(data=Boston, medv ~ lstat+rm+dis)
+ summary(M2)
+M <- lm(data=Boston, medv ~ crim+lstat+rm+dis)
+ summary(M)
+ anova(M2,M)
+M1 <- lm(data=Boston, medv ~ crim+lstat+rm+dis+nox+ptratio)
+ summary(M1)
+ anova(M, M1)
+M3 <- lm(data=Boston, medv ~ crim+lstat+rm+dis+nox+ptratio+age)
+  anova(M1, M3)
+M4 <- lm(data=Boston, medv ~ crim+lstat+rm+dis+nox+ptratio+tax)
+  anova(M1, M4)
+  
+M5 <- lm(data=Boston, medv ~ lstat+rm+dis+nox+ptratio)
+anova(M5, M1)
+
+par(mfrow=c(2,3))
+plot(M2, which=1, main='M2')
+plot(M, which=1, main='M') 
+plot(M1, which=1, main='M1') 
+plot(M3, which=1, main='M3') 
+plot(M4, which=1, main='M4') 
+plot(M5, which=1, main='M5') 
+
+```
+
+We can see from the plot above that there is a clear curvature in all the models, where the linearity assumption is violated. Thus, it appears reasonable to transform Y somehow.
+
+```{r}
+M5log <- lm(data=Boston, log(medv) ~ lstat+rm+dis+nox+ptratio)
+plot(M5log, which=1, main='M5log') 
+
+# quadratic
+M6log <- lm(data=Boston, log(medv) ~ I(lstat^2)+rm+dis+nox+ptratio)
+plot(M6log, which=1, main='M5log') 
+
+AIC(M5log)
+AIC(M6log)
+BIC(M5log)
+BIC(M6log)
+
+```
+
+
+```{r}
+# predictions
+yhat.lr <- exp(predict(M5log, newdata=Boston[-train,]))
+                   #, interval="prediction", level=0.95)
+MSElr <- mean((yhat.lr - boston.test)^2)
+MSElr
+
+```
+
+```{r}
+# prediction intervals with 95%                                              
+predict<-exp(predict(M5log, newdata=Boston[-train,], interval="prediction", level=0.95))
+predict
+```
+
+```{r}
+## comparison of MSEs
+MSEs <- c(MSErf, MSElr)
+MSEs <- data.frame("random forest" = MSErf, "linear regression" = MSElr)
+MSEs 
+
+```
+```{r}
+count = 0
+for (val in 1:nrow(predict)){
+if (boston.test[val] < predict[val,3] & boston.test[val]> predict[val,2]) {count = count + 1}
+}
+print(count)
+perct <- count/nrow(predict)
+print(perct)
+```
+
+# 
+```{r}
+#install.packages("randomForestSRC")
+
+
+  ## quantile regression with mse splitting
+  o <- quantreg(medv ~ ., Boston, splitrule = "mse", nodesize = 1)
+
+  ## continuous rank probabiliy score (crps) 
+  plot(get.quantile.crps(o), type = "l")
+
+  ## quantile regression plot
+  plot.quantreg(o, .05, .95)
+  plot.quantreg(o, .25, .75)
+
+  ## (A) extract 25,50,75 quantiles
+  quant.dat <- get.quantile(o, c(.25, .50, .75))
+
+  ## (B) values expected under normality
+  quant.stat <- get.quantile.stat(o)
+  c.mean <- quant.stat$mean
+  c.std <- quant.stat$std
+  q.25.est <- c.mean + qnorm(.25) * c.std
+  q.75.est <- c.mean + qnorm(.75) * c.std
+
+  ## compare (A) and (B)
+  print(head(data.frame(quant.dat[, -2],  q.25.est, q.75.est)))
+
+
+
+```
+```{r}
+#install.packages("usethis")
+
+library(usethis)
+use_git_config(user.name = "KatherineLiu", user.email = "katherineliu9802@gmail.com")
+
+```
+
