@@ -136,6 +136,8 @@ MSEs <- data.frame("random forest" = MSErf, "linear regression" = MSElr)
 MSEs 
 
 ```
+
+# number of observations falling into prediction intervals
 ```{r}
 count = 0
 for (val in 1:nrow(predict)){
@@ -149,10 +151,19 @@ print(perct)
 # 
 ```{r}
 #install.packages("randomForestSRC")
-
+library(randomForestSRC)
 
   ## quantile regression with mse splitting
-  o <- quantreg(medv ~ ., Boston, splitrule = "mse", nodesize = 1)
+  ## train (grow) call followed by test call
+
+  train.df <- Boston[train,]
+  test.df <- Boston[-train,]
+  
+  o <- quantreg(medv ~ ., train.df, splitrule = "mse", nodesize = 1)
+  o.test <- quantreg(object=o, newdata=test.df)
+  quant.dat <- get.quantile(o.test, c(.05, .95))
+  quant.dat    #prediction intervals
+  o.test$predicted  #predictions
 
   ## continuous rank probabiliy score (crps) 
   plot(get.quantile.crps(o), type = "l")
@@ -177,11 +188,5 @@ print(perct)
 
 
 ```
-```{r}
-#install.packages("usethis")
 
-library(usethis)
-use_git_config(user.name = "KatherineLiu", user.email = "katherineliu9802@gmail.com")
-
-```
 
