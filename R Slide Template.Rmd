@@ -1,75 +1,199 @@
 ---
-title: "Slide Title"
-author: "Your Name"
-date: "Today's Date"
-output: ioslides_presentation
-widescreen: true
+title: "Summer Research 2019 Week 2"
+author: "Joe Sato, Katherine Liu"
+date: "June 26, 2019"
+output:
+  beamer_presentation: default
+  ioslides_presentation: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+#ioslides_presentation(widescreen=TRUE, incremental=TRUE)
 ```
 
-
-
-```{r, echo=F, fig.width=7, fig.height=4, fig.align='center', message=FALSE, warning=FALSE}
+```{r, echo=F, fig.width=7, fig.height=4, fig.align='center', message=FALSE, warning=FALSE, include=FALSE}
 #load necessary packages
 library(ggformula)
-library(tidyverse)
+
 library(knitr)
+library(randomForestSRC)
+#want to keep everything in a single line
+#motivation for width of prediction intervals: why is SSE not enough?
 ```
 
-## Slide 1 Title
+## Review: Prediction 
 
-A numbered list
+Prediction 
 
-1. Item one     
-2. Item two     
-3. Item three    
+* Assumes: data follow $y_i = f(x_i) + \epsilon_i$  
+    - $y_i = f(x_i)$ : **true pattern**  
+    - $\epsilon_i$ : **noise** (random)  
+  
+* Seeks **true pattern** from data, differentiating it from **noise**  
+    - then use it to predict  
 
-## Slide 2 Title
+## Ways to Estimate the True Pattern
 
-A bulleted list
+**Linear Regression**  
 
-* Item one     
-* Item two     
-    -subitem 1   
-    -subitem 2
-* Item three    
+* Can fit **ANY** functions, if coefficients are **linear**   
+* Can produce **prediction intervals** 
+  
+* **Must specify** the function in advance
+ 
 
-## Slide 3 Title
+```{r,include=FALSE}
+#Thought of talking about the following, but decided not to; it'd take time to explain "normal" and "variance", which is not quite the main point here
 
-A mathematical expression
-
-$Y=X\beta+\epsilon$
-
-For **bold font** use two asterisks.   
-
-For *italics* use one askerisk. 
-
-## Slide 4 Title
-
-R Code
-
-```{r, fig.height=3, fig.width=6}
-data(mtcars)
-gf_histogram(data=mtcars, ~mpg, color = "blue")
+#* Noise: **normal**    
+#* Variance: **constant**  
+#* Observations: **independent** 
 ```
 
-## Slide 5 Title {.smaller}
+**Random Forests**  
 
-More R code (use echo=FALSE to suppress R code)
+* Works for **ANY** underlying patterns, even for **non-linear** coefficients
+* **No need to specify** the function 
+  
+* Needs: **large** data set (for training) 
+* **Maybe** can produce prediction interval **?**  
 
-```{r, echo=FALSE}
-m <- lm(data=mtcars, mpg~wt)
-summary(m)
+## Review: 95% Prediction interval 
+
+**95% Prediction Interval**
+
+* W.r.t. a **single data point** yet to be observed
+* Say: we estimated the true pattern from ${(x_1,f(x_1)),...,(x_n, f(x_n))}$  
+  
+* 95% PI of $f(x_{n+1})$: [a,b] such that  
+    - $f(x_{n+1})$ $\in$ [a,b] by 95%  
+    
+**95% Confidence Interval**
+
+* W.r.t. the **entire set** of points of the same true pattern
+* 95% CI: [a,b] such that   
+    - (avg. of all points in the entire set) $\in$ [a,b] by 95%
+
+## Objective
+
+To figure out:  
+
+* If **Random Forests** can accurately produce **Prediction intervals**    
+* **For what kind of data LR & RF are appropriate ?**
+
+    
+## Comparison: Method
+
+1. **Generated** datasets using a specific $y=f(x)$ $+$ $\epsilon$  
+    - Linear & Single-variable   
+    - Non-Linear & Single-variable   
+
+2. Applied LR & RF and examined:  
+    - Accuracy of PI-s: **Coverage rate**  
+       
+    - Prediction Accuracy: **MSE**    
+      
+    - How informative PI-s are: **width of PI-s**
+    
+
+## Simulations 
+Simulation 1: $Y_i=f(X_i)+\epsilon_i$ where $\epsilon_i \sim \mathcal{N}(0, 5^{2})$
+```{r, echo=F, fig.width=4, fig.height=2.6, fig.align='center', message=FALSE, warning=FALSE}
+set.seed(06232019)#set seed
+
+
+  n <- 2000  #number of observations (trainig and test set combined)
+  sig <- 5  #error standard deviation
+  x <- runif(n, 0, 10) #generate x variable Unif(0,10) distribution
+  e <- rnorm(n, 0, sig) #generate error term 
+  y <- 2*x+3 + e  #generate response values 
+  data <- data.frame(x, y) #combine explanatory and response varables into data frame
+  train <- data[1:(n/2), ] #use first half of observations as training data
+  test <- data[(n/2+1):n, ] #use second half of observations as test data
+  gf_point(data=train, y~x, size =0.5)
+```
+What is form of f?       - linear   - quadratic  - trigonometric  - ....
+    
+## Simulation 1
+Simulation 1: $Y_i = 2X_i + 3 + \epsilon_i$
+
+```{r, echo=F, out.width = '100%', out.height='70%', include=T}
+knitr::include_graphics("Sim1-1.png")
+```
+
+## Simulation 1
+True function: $Y_i = 2X_i + 3 + \epsilon_i$  
+Linear Regression Model: $Y_i = 2.01658 X_i + 2.96383+ \epsilon_i$
+
+```{r, echo=F, out.width = '100%', out.height='70%', include=T}
+knitr::include_graphics("Sim1-2.png")
+```
+
+## Simulation 1 Radom Forest
+-nodesize = 10
+```{r , echo=F, out.width = '100%', out.height='70%', include=T}
+knitr::include_graphics("Sim1-3.png")
 ```
 
 
-## Silde 6 title
 
-To insert an external image, make sure image is in the same directory as the side .Rmd file. 
+## Simulation 2 
+Simulation 2: $Y_i=f(X_i)+\epsilon_i$ where $\epsilon_i \sim \mathcal{N}(0, 5^{2})$
+```{r, echo=F, fig.width=4, fig.height=2.6, fig.align='center', message=FALSE, warning=FALSE}
+set.seed(0623201) #set seed
 
-```{r , out.width = '100%', out.height='100%', include=FALSE}
-knitr::include_graphics("image.jpg")
+  n <- 2000  #number of observations (trainig and test set combined)
+  sig <- 5  #error standard deviation
+  x <- runif(n, 0, 10) #generate x variable Unif(0,10) distribution
+  e <- rnorm(n, 0, sig) #generate error term 
+  y <- 0.1*(x-7)^2-3*cos(x) + 5*log(abs(x)) + 3 + e  #generate response values 
+  data <- data.frame(x, y) #combine explanatory and response varables into data frame
+  train <- data[1:(n/2), ] #use first half of observations as training data
+  test <- data[(n/2+1):n, ] #use second half of observations as test data
+  gf_point(data=train, y~x, size =0.5)
 ```
+What is form of f?       - linear   - quadratic  - trigonometric  - ....
+    
+## Simulation 2
+True function: $Y_i = 0.1(x-7)^2 - 3cos(x) + 5 log(|x|) + 3 + \epsilon_i$
+
+```{r, echo=F, out.width = '100%', out.height='70%', include=T}
+knitr::include_graphics("Sim2-1.png")
+```
+
+## Simulation 2 Linear Regression Model
+
+```{r, echo=F, out.width = '100%', out.height='70%', include=T}
+knitr::include_graphics("Sim2-2.png")
+```
+
+## Simulation 2 Radom Forest
+-nodesize = 10
+```{r , echo=F, out.width = '100%', out.height='70%', include=T}
+knitr::include_graphics("Sim2-3.png")
+```
+
+## Simulations 3 & 4
+
+Simulation 3(Multivariate Linear):  $Y_i =2X_1i+3X_2i+4X_3i-3X_4i+ X_5i +\epsilon_i$
+
+Simulation 4(Multivariate Nonlinear):   $Y_i = (X_1i-6)^2 + 12cos(X_2i) + (X_3i-5)*(X_4i-3) + 0.02(X_5i-5)^5+ \epsilon_i$
+
+## Results
+
+```{r , echo=F, out.width = '90%', out.height='60%', include=T}
+knitr::include_graphics("resultstable.png")
+```
+
+
+
+## Next Steps
+* tune parameters in RF   
+* learn new PI method
+* apply to real datasets    
+
+
+
+
+
