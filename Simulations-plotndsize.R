@@ -98,7 +98,7 @@ for(nd in nodesize){ #loop through a range of nodesizes
   avgResults[j+30,3 ] <- mean(allResults[4,3,])
 }
 avgResults
-save("Simulations-plotndsize.Rdata")
+save(avgResults, file="Simulations-plotndsize1.Rdata")
 
 #plotting
 ndsize<- c(rep(nodesize,4))
@@ -164,6 +164,8 @@ for(nd in nodesize){ #loop through a range of nodesizes
   avgResults[j+30,3 ] <- mean(allResults[4,3,])
 }
 avgResults
+save(avgResults, file="Simulations-plotndsize2.Rdata")
+
 
 #plotting
 ndsize<- c(rep(nodesize,4))
@@ -184,7 +186,6 @@ p + geom_point() +geom_line() + geom_hline(yintercept=0.95)
   #labs(color = "Curve")+ theme(legend.text=element_text(size=12))+ theme(legend.title=element_text(size=12))+theme(legend.position = "bottom")+theme_bw()
 
 
-save("Simulations-plotndsize.Rdata")
 ###################################################################
 # Simulation 3: Linear Model (multivariate)
 
@@ -238,7 +239,7 @@ for(nd in nodesize){ #loop through a range of nodesizes
   avgResults[j+30,3 ] <- mean(allResults[4,3,])
 }
 avgResults
-save("Simulations-plotndsize.Rdata")
+save(avgResults, file="Simulations-plotndsize3.Rdata")
 
 #plotting
 ndsize<- c(rep(nodesize,4))
@@ -308,7 +309,7 @@ for(nd in nodesize){ #loop through a range of nodesizes
   avgResults[j+30,3 ] <- mean(allResults[4,3,])
 }
 avgResults
-save("Simulations-plotndsize.Rdata")
+save(avgResults, file="Simulations-plotndsize4.Rdata")
 
 #plotting
 ndsize<- c(rep(nodesize,4))
