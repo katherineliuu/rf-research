@@ -2,6 +2,60 @@
 library(randomForestSRC)
 avgResults <-  array(NA, dim=c(8,3)) # average MSE, meanWIdth, coverage rate for 4 simulations
 
+RFOOBInterval <- function(x, 
+                          y, 
+                          x0, 
+                          ntree = 1000, 
+                          alpha = 0.10, 
+                          symmetry = TRUE,
+                          mtry = if (!is.null(y) && !is.factor(y))
+                            max(floor(ncol(x)/3), 1) else floor(sqrt(ncol(x))), 
+                          nodesize = if (!is.null(y) && !is.factor(y)) 5 else 1){
+  x <- as.matrix(x)
+  x0 <- as.matrix(x0)
+  colnames(x) <- 1:ncol(x)
+  rownames(x) <- 1:nrow(x)
+  colnames(x0) <- 1:ncol(x0)
+  rownames(x0) <- 1:nrow(x0)
+  
+  n = nrow(x)
+  ntest = nrow(x0)
+  
+  rf = randomForest(x=x, y=y, ntree=ntree, mtry = mtry, nodesize = nodesize,
+                    keep.forest=TRUE, keep.inbag=TRUE)
+  
+  test_pred <- predict(rf, x0)
+  oob_abs_error = sort(abs(y - rf$predicted))
+  oob_error = sort(y - rf$predicted)
+  
+  upper_pred = rep(NA, ntest)
+  lower_pred = rep(NA, ntest)
+  
+  ## symmetry = TRUE leads to the symmetric OOB Intervals
+  ## symmetry = FALSE leads to the standard OOB Intervals
+  if(symmetry){
+    for (i in 1:ntest){
+      upper_pred[i] = test_pred[i] + quantile(oob_abs_error,1-alpha)
+      lower_pred[i] = test_pred[i] - quantile(oob_abs_error,1-alpha)
+    }
+  }
+  else{
+    for (i in 1:ntest){
+      upper_pred[i] = test_pred[i] + quantile(oob_error, 1-alpha/2)
+      lower_pred[i] = test_pred[i] + quantile(oob_error, alpha/2)
+    }
+    
+  }
+  
+  return(list(pred = matrix(test_pred,ntest,1),
+              lo = matrix(lower_pred,ntest,1), 
+              up = matrix(upper_pred,ntest,1), 
+              fit = matrix(predict(rf,x),n,1)))
+} #### function OOB prediction interval 
+
+
+
+
 getResults <- function(train, test, nodesize) {
   results <-  array(NA, dim=c(2,3)) #MSE, meanWIdth, coverage rate
   #LR
@@ -23,14 +77,15 @@ getResults <- function(train, test, nodesize) {
   return(results)
 }  ##function
 
-iter <- 3
+iter <- 10
 allResults <- array(NA, dim=c(2,3, iter))
+OOBResults <- array(NA, dim=c(2,3,iter)) 
 ###################################################################
 # Simulation 1: Linear Model (one variable)
 set.seed(06232016)#set seed
 
 for(i in 1:iter){
-  n <- 2000  #number of observations (trainig and test set combined)
+  n <- 100 #number of observations (trainig and test set combined)
   sig <- 5  #error standard deviation
   x <- runif(n, 0, 10) #generate x variable Unif(0,10) distribution
   e <- rnorm(n, 0, sig) #generate error term 
@@ -39,14 +94,16 @@ for(i in 1:iter){
   train <- data[1:(n/2), ] #use first half of observations as training data
   test <- data[(n/2+1):n, ] #use second half of observations as test data
   allResults[,,i] <- getResults(train, test, 10)
+  OOBResults[,,i] <- RFOOBInterval(x= train$x, y=train$y, x0 = test$x,  symmetry = TRUE)
 }
-  allResults
-  avgResults[1,1] <- mean(allResults[1,1,])
-  avgResults[1,2] <- mean(allResults[1,2,])
-  avgResults[1,3] <- mean(allResults[1,3,])
-  avgResults[2,1] <- mean(allResults[2,1,])
-  avgResults[2,2] <- mean(allResults[2,2,])
-  avgResults[2,3] <- mean(allResults[2,3,])
+  allResults1
+  OOBResults
+  avgResults[1,1] <- mean(allResults1[1,1,])
+  avgResults[1,2] <- mean(allResults1[1,2,])
+  avgResults[1,3] <- mean(allResults1[1,3,])
+  avgResults[2,1] <- mean(allResults1[2,1,])
+  avgResults[2,2] <- mean(allResults1[2,2,])
+  avgResults[2,3] <- mean(allResults1[2,3,])
   avgResults
   
   
@@ -67,7 +124,14 @@ for(i in 1:iter){
     test <- data[(n/2+1):n, ] #use second half of observations as test data
     allResults[,,iter] <- getResults(train, test, 10)
   }
-  allResults
+  allResults2
+  avgResults[3,1] <- mean(allResults2[1,1,])
+  avgResults[3,2] <- mean(allResults2[1,2,])
+  avgResults[3,3] <- mean(allResults2[1,3,])
+  avgResults[4,1] <- mean(allResults2[2,1,])
+  avgResults[4,2] <- mean(allResults2[2,2,])
+  avgResults[4,3] <- mean(allResults2[2,3,])
+  avgResults
     
     ###################################################################
     # Simulation 3: Linear Model (multivariate)
@@ -85,7 +149,13 @@ for(i in 1:iter){
       test <- data[(n/2+1):n, ] #use second half of observations as test data
       allResults[,,iter] <- getResults(train, test, 1)
       }
-    allResults
+    allResults3
+    avgResults[5,1] <- mean(allResults3[1,1,])
+    avgResults[5,2] <- mean(allResults3[1,2,])
+    avgResults[5,3] <- mean(allResults3[1,3,])
+    avgResults[6,1] <- mean(allResults3[2,1,])
+    avgResults[6,2] <- mean(allResults3[2,2,])
+    avgResults[6,3] <- mean(allResults3[2,3,])
     avgResults
       
       ###################################################################
@@ -103,6 +173,26 @@ for(i in 1:iter){
         data <- data.frame(X, y) #combine explanatory and response varables into data frame
         train <- data[1:(n/2), ] #use first half of observations as training data
         test <- data[(n/2+1):n, ] #use second half of observations as test data
-        allResults[,,iter] <- getResults(train, test, 1)
+        allResults4[,,iter] <- getResults(train, test, 1)
         }
-  allResults
+  allResults4
+  avgResults[7,1] <- mean(allResults4[1,1,])
+  avgResults[7,2] <- mean(allResults4[1,2,])
+  avgResults[7,3] <- mean(allResults4[1,3,])
+  avgResults[8,1] <- mean(allResults4[2,1,])
+  avgResults[8,2] <- mean(allResults4[2,2,])
+  avgResults[8,3] <- mean(allResults4[2,3,])
+  
+  avgResults
+  colnames(avgResults) <- c("MSPE", "PIWidth", "CoverageRate")
+  rownames(avgResults) <- c("Sim1.LR", "Sim1.RF", 
+                            "Sim2.LR", "Sim2.RF",
+                            "Sim3.LR", "Sim3.RF",
+                            "Sim4.LR", "Sim4.RF" )
+  
+  #plot for coverage rate
+  boxplot(len~supp*dose, notch=TRUE,
+          main = "Multiple boxplots for comparision",
+          at = c(1,2,3,4),
+          names = c("1", "2", "3", "4"),
+          col=(c("navy","maroon")))
