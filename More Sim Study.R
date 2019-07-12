@@ -103,7 +103,7 @@ for(nd in nodesize){ #loop through a range of nodesizes
   avgResults[j+30,3 ] <- mean(allResults[4,3,])
 }
 avgResults
-save("MoreSimStudy1.Rdata")
+save(avgResults, file="MoreSimStudy1.Rdata")
 
 
 # Simulation 2: heteroscedastic-symmetric (non-normal, T distribution)
@@ -163,7 +163,7 @@ for(nd in nodesize){ #loop through a range of nodesizes
   avgResults[j+30,3 ] <- mean(allResults[4,3,])
 }
 avgResults
-save("MoreSimStudy2.Rdata")
+save(avgResults, file="MoreSimStudy2.Rdata")
 
 
 ###################################################################
@@ -224,7 +224,7 @@ for(nd in nodesize){ #loop through a range of nodesizes
   avgResults[j+30,3 ] <- mean(allResults[4,3,])
 }
 avgResults
-save("MoreSimStudy3.Rdata")
+save(avgResults, file="MoreSimStudy3.Rdata")
 
 
 ###################################################################
@@ -281,7 +281,7 @@ for(nd in nodesize){ #loop through a range of nodesizes
   avgResults[j+30,3 ] <- mean(allResults[4,3,])
 }
 avgResults
-save("MoreSimStudy4.Rdata")
+save(avgResults, file="MoreSimStudy4.Rdata")
 
 ###################################################################
 # Simulation 5: homoscedastic-symmetric(T)
@@ -338,7 +338,7 @@ for(nd in nodesize){ #loop through a range of nodesizes
   avgResults[j+30,3 ] <- mean(allResults[4,3,])
 }
 avgResults
-save("MoreSimStudy5.Rdata")
+save(avgResults, file="MoreSimStudy5.Rdata")
 
 ###################################################################
 # Simulation 6: homoscedastic-asymmetric
@@ -399,4 +399,4 @@ for(nd in nodesize){ #loop through a range of nodesizes
   avgResults[j+30,3 ] <- mean(allResults[4,3,])
 }
 avgResults
-save("MoreSimStudy6.Rdata")
+save(avgResults, file="MoreSimStudy6.Rdata")
