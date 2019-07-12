@@ -104,12 +104,12 @@ save("Simulations-plotndsize.Rdata")
 ndsize<- c(rep(nodesize,4))
 method <- c(rep('LR',10), rep('RF-QRF',10), rep('RF-OOB',10),rep('RF-OOBsym',10))
 MSPE <- avgResults[,1]
-Width <- avgResults[,2]
+PIWidth <- avgResults[,2]
 Cov.Rate <- avgResults[,3]
-dataf<- data.frame(ndsize,method,MSPE,Width,Cov.Rate)
+dataf<- data.frame(ndsize,method,MSPE,PIWidth,Cov.Rate)
 p <- ggplot(dataf, aes(x=ndsize,y=MSPE, color=method))
 p + geom_point() +geom_line()
-p <- ggplot(dataf, aes(x=ndsize,y=Width, color=method))
+p <- ggplot(dataf, aes(x=ndsize,y=PIWidth, color=method))
 p + geom_point() +geom_line()
 p <- ggplot(dataf, aes(x=ndsize,y=Cov.Rate, color=method))
 p + geom_point() +geom_line() + geom_hline(yintercept=0.95)
@@ -169,12 +169,12 @@ avgResults
 ndsize<- c(rep(nodesize,4))
 method <- c(rep('LR',10), rep('RF-QRF',10), rep('RF-OOB',10),rep('RF-OOBsym',10))
 MSPE <- avgResults[,1]
-Width <- avgResults[,2]
+PIWidth <- avgResults[,2]
 Cov.Rate <- avgResults[,3]
-dataf<- data.frame(ndsize,method,MSPE,Width,Cov.Rate)
+dataf<- data.frame(ndsize,method,MSPE,PIWidth,Cov.Rate)
 p <- ggplot(dataf, aes(x=ndsize,y=MSPE, color=method))
 p + geom_point() +geom_line()
-p <- ggplot(dataf, aes(x=ndsize,y=Width, color=method))
+p <- ggplot(dataf, aes(x=ndsize,y=PIWidth, color=method))
 p + geom_point() +geom_line()
 p <- ggplot(dataf, aes(x=ndsize,y=Cov.Rate, color=method))
 p + geom_point() +geom_line() + geom_hline(yintercept=0.95)
@@ -244,12 +244,12 @@ save("Simulations-plotndsize.Rdata")
 ndsize<- c(rep(nodesize,4))
 method <- c(rep('LR',10), rep('RF-QRF',10), rep('RF-OOB',10),rep('RF-OOBsym',10))
 MSPE <- avgResults[,1]
-Width <- avgResults[,2]
+PIWidth <- avgResults[,2]
 Cov.Rate <- avgResults[,3]
-dataf<- data.frame(ndsize,method,MSPE,Width,Cov.Rate)
+dataf<- data.frame(ndsize,method,MSPE,PIWidth,Cov.Rate)
 p <- ggplot(dataf, aes(x=ndsize,y=MSPE, color=method))
 p + geom_point() +geom_line()
-p <- ggplot(dataf, aes(x=ndsize,y=Width, color=method))
+p <- ggplot(dataf, aes(x=ndsize,y=PIWidth, color=method))
 p + geom_point() +geom_line()
 p <- ggplot(dataf, aes(x=ndsize,y=Cov.Rate, color=method))
 p + geom_point() +geom_line() + geom_hline(yintercept=0.95)
@@ -314,12 +314,12 @@ save("Simulations-plotndsize.Rdata")
 ndsize<- c(rep(nodesize,4))
 method <- c(rep('LR',10), rep('RF-QRF',10), rep('RF-OOB',10),rep('RF-OOBsym',10))
 MSPE <- avgResults[,1]
-Width <- avgResults[,2]
+PIWidth <- avgResults[,2]
 Cov.Rate <- avgResults[,3]
-dataf<- data.frame(ndsize,method,MSPE,Width,Cov.Rate)
+dataf<- data.frame(ndsize,method,MSPE,PIWidth,Cov.Rate)
 p <- ggplot(dataf, aes(x=ndsize,y=MSPE, color=method))
 p + geom_point() +geom_line()
-p <- ggplot(dataf, aes(x=ndsize,y=Width, color=method))
+p <- ggplot(dataf, aes(x=ndsize,y=PIWidth, color=method))
 p + geom_point() +geom_line()
 p <- ggplot(dataf, aes(x=ndsize,y=Cov.Rate, color=method))
 p + geom_point() +geom_line() + geom_hline(yintercept=0.95)
