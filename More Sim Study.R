@@ -79,11 +79,11 @@ for(nd in nodesize){ #loop through a range of nodesizes
   set.seed(062)
   for (i in 1:10){
     n <- 2000  #number of observations (trainig and test set combined)
-    sig <- 5  #error standard deviation
-    x <- runif(n, 0, 10) #generate x variable Unif(0,10) distribution
-    e <- rnorm(n, 0, sig) #generate error term 
-    y <- 2*x+3 + e  #generate response values 
-    data <- data.frame(x, y) #combine explanatory and response varables into data frame
+    xvec <- runif(n*10, 0, 10) #generate observations for 10 explanatory variables
+    X <- matrix(xvec, ncol=10) #arrange explanatory variables into matrix
+    e <- rnorm(n, mean = 0, sd =0.2*abs(X[,1]^2+X[,3])) #generate heterosedastic error term 
+    y <- (X[,1]-6)^2 + 12*cos(X[,3]) + e  #generate response values  (nonlinear)
+    data <- data.frame(X, y) #combine explanatory and response varables into data frame
     train <- data[1:(n/2), ] #use first half of observations as training data
     test <- data[(n/2+1):n, ] #use second half of observations as test data
     allResults[,,i] <- getResults(train, test, nodesize = nd, mtry = 10)
@@ -139,11 +139,14 @@ for(nd in nodesize){ #loop through a range of nodesizes
   set.seed(062)
   for (i in 1:10){
     n <- 2000  #number of observations (trainig and test set combined)
-    sig <- 5  #error standard deviation
-    x <- runif(n, 0, 10) #generate x variable Unif(0,10) distribution
-    e <- rnorm(n, 0, sig) #generate error term 
-    y <- 2*x+3 + e  #generate response values 
-    data <- data.frame(x, y) #combine explanatory and response varables into data frame
+    df=5
+    xvec <- runif(n*10, 0, 10) #generate observations for 10 explanatory variables
+    X <- matrix(xvec, ncol=10) #arrange explanatory variables into matrix
+    e <- rt(n, df)*sqrt(0.3*(abs(X[,1]^3+X[,3])) * (df-2)/df)
+    
+    #generate heterosedastic error term 
+    y <- (X[,1]-6)^2 + 12*cos(X[,3]) + e  #generate response values  (nonlinear)
+    data <- data.frame(X, y) #combine explanatory and response varables into data frame
     train <- data[1:(n/2), ] #use first half of observations as training data
     test <- data[(n/2+1):n, ] #use second half of observations as test data
     allResults[,,i] <- getResults(train, test, nodesize = nd, mtry = 10)
@@ -200,11 +203,14 @@ for(nd in nodesize){ #loop through a range of nodesizes
   set.seed(062)
   for (i in 1:10){
     n <- 2000  #number of observations (trainig and test set combined)
-    sig <- 5  #error standard deviation
-    x <- runif(n, 0, 10) #generate x variable Unif(0,10) distribution
-    e <- rnorm(n, 0, sig) #generate error term 
-    y <- 2*x+3 + e  #generate response values 
-    data <- data.frame(x, y) #combine explanatory and response varables into data frame
+    df=5
+    xvec <- runif(n*10, 0, 10) #generate observations for 10 explanatory variables
+    X <- matrix(xvec, ncol=10) #arrange explanatory variables into matrix
+    e <- (rexp(n, rate = 2)-1/2)*0.1*abs(X[,1]^3)
+    
+    #generate heterosedastic error term 
+    y <- (X[,1]-6)^2 + 12*cos(X[,3]) + e  #generate response values  (nonlinear)
+    data <- data.frame(X, y) #combine explanatory and response varables into data frame
     train <- data[1:(n/2), ] #use first half of observations as training data
     test <- data[(n/2+1):n, ] #use second half of observations as test data
     allResults[,,i] <- getResults(train, test, nodesize = nd, mtry = 10)
@@ -257,11 +263,11 @@ for(nd in nodesize){ #loop through a range of nodesizes
   set.seed(062)
   for (i in 1:10){
     n <- 2000  #number of observations (trainig and test set combined)
-    sig <- 5  #error standard deviation
-    x <- runif(n, 0, 10) #generate x variable Unif(0,10) distribution
-    e <- rnorm(n, 0, sig) #generate error term 
-    y <- 2*x+3 + e  #generate response values 
-    data <- data.frame(x, y) #combine explanatory and response varables into data frame
+    xvec <- runif(n*10, 0, 10) #generate observations for 10 explanatory variables
+    X <- matrix(xvec, ncol=10) #arrange explanatory variables into matrix
+    e <- rnorm(n, mean=0, 5) #generate homosedastic error term that follows T distribution
+    y <- (X[,1]-6)^2 + 12*cos(X[,3]) + e  #generate response values  (nonlinear)
+    data <- data.frame(X, y) #combine explanatory and response varables into data frame
     train <- data[1:(n/2), ] #use first half of observations as training data
     test <- data[(n/2+1):n, ] #use second half of observations as test data
     allResults[,,i] <- getResults(train, test, nodesize = nd, mtry = 10)
@@ -314,11 +320,11 @@ for(nd in nodesize){ #loop through a range of nodesizes
   set.seed(062)
   for (i in 1:10){
     n <- 2000  #number of observations (trainig and test set combined)
-    sig <- 5  #error standard deviation
-    x <- runif(n, 0, 10) #generate x variable Unif(0,10) distribution
-    e <- rnorm(n, 0, sig) #generate error term 
-    y <- 2*x+3 + e  #generate response values 
-    data <- data.frame(x, y) #combine explanatory and response varables into data frame
+    xvec <- runif(n*10, 0, 10) #generate observations for 10 explanatory variables
+    X <- matrix(xvec, ncol=10) #arrange explanatory variables into matrix
+    e <- rt(n, df=df) #generate homosedastic error term that follows T distribution
+    y <- (X[,1]-6)^2 + 12*cos(X[,3]) + e  #generate response values  (nonlinear)
+    data <- data.frame(X, y) #combine explanatory and response varables into data frame
     train <- data[1:(n/2), ] #use first half of observations as training data
     test <- data[(n/2+1):n, ] #use second half of observations as test data
     allResults[,,i] <- getResults(train, test, nodesize = nd, mtry = 10)
@@ -375,11 +381,14 @@ for(nd in nodesize){ #loop through a range of nodesizes
   set.seed(062)
   for (i in 1:10){
     n <- 2000  #number of observations (trainig and test set combined)
-    sig <- 5  #error standard deviation
-    x <- runif(n, 0, 10) #generate x variable Unif(0,10) distribution
-    e <- rnorm(n, 0, sig) #generate error term 
-    y <- 2*x+3 + e  #generate response values 
-    data <- data.frame(x, y) #combine explanatory and response varables into data frame
+    df=5
+    xvec <- runif(n*10, 0, 10) #generate observations for 10 explanatory variables
+    X <- matrix(xvec, ncol=10) #arrange explanatory variables into matrix
+    e <- rexp(n, rate = 2)-1/2
+    
+    #generate heterosedastic error term 
+    y <- (X[,1]-6)^2 + 12*cos(X[,3]) + e  #generate response values  (nonlinear)
+    data <- data.frame(X, y) #combine explanatory and response varables into data frame
     train <- data[1:(n/2), ] #use first half of observations as training data
     test <- data[(n/2+1):n, ] #use second half of observations as test data
     allResults[,,i] <- getResults(train, test, nodesize = nd, mtry = 10)
